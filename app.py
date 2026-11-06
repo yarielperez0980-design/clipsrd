@@ -343,6 +343,10 @@ else:
                         "nocheckcertificate": True,
                         "geo_bypass": True,
                     }
+                    File "/mount/src/clipsrd/app.py", line 346
+                      with st.spinner("Descargando video largo..."):
+                                                                    ^
+IndentationError: unindent does not match any outer indentation level
                     with st.spinner("Descargando video largo..."):
                         with yt_dlp.YoutubeDL(opts) as ydl:
                             info = ydl.extract_info(url.strip(), download=True)
