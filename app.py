@@ -343,6 +343,7 @@ else:
                         "nocheckcertificate": True,
                         "geo_bypass": True,
                     }
+                    }
                     with st.spinner("Descargando video largo..."):
                         with yt_dlp.YoutubeDL(opts) as ydl:
                             info = ydl.extract_info(url.strip(), download=True)
