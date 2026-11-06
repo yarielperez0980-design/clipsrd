@@ -253,7 +253,7 @@ else:
             else:
                 try:
                     ydl_opts = {
-                        "format": "best",
+                        "format": "best/bestvideo+bestaudio",
                         "outtmpl": str(Path(workspace_dir) / "source.%(ext)s"),
                         "noplaylist": True,
                         "quiet": True,
@@ -261,6 +261,9 @@ else:
                         "extractor_args": {"youtube": {"player_client": ["android", "web"]}},
                         "nocheckcertificate": True,
                         "geo_bypass": True,
+                    }
+                    if Path("cookies.txt").exists():
+                        ydl_opts["cookiefile"] = "cookies.txt"
                     }
                     if Path("cookies.txt").exists():
                         ydl_opts["cookiefile"] = "cookies.txt"
