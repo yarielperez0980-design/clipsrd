@@ -153,7 +153,7 @@ def load_users():
         try:
             with open(USER_DB, "r") as f:
                 data = json.load(f)
-                data["yariel"] = default_users["yariel"] # Asegurar que admin siempre esté aprobado
+                data["yariel"] = default_users["yariel"]
                 return data
         except:
             return default_users
@@ -204,7 +204,6 @@ if not st.session_state["logged_in"]:
             if st.button(t['enter'], key="btn_login"):
                 login_user_clean = login_user.strip().lower()
                 if login_user_clean in users and users[login_user_clean]["password"] == hash_password(login_pass):
-                    # Verificar si está aprobado
                     if users[login_user_clean].get("approved", False):
                         st.session_state["logged_in"] = True
                         st.session_state["username"] = login_user_clean
@@ -237,7 +236,7 @@ if not st.session_state["logged_in"]:
                         "role": "user",
                         "name": reg_name.strip(),
                         "hint": reg_hint.strip() if reg_hint else "Sin pista",
-                        "approved": False  # <-- NUEVO: Empieza desaprobado hasta que el admin lo acepte
+                        "approved": False
                     }
                     save_users(users)
                     st.success("¡Cuenta creada! Queda pendiente de aprobación por el administrador para poder entrar.")
@@ -275,169 +274,4 @@ else:
             st.markdown(f"👤 {t['user_role']}")
             
         st.markdown("---")
-        st.markdown(f"## {t['sidebar_config']}")
-        aspect = st.selectbox(t['aspect_label'], ["9:16 Vertical (TikTok / Reels / Shorts)", "1:1 Cuadrado", "16:9 Horizontal"])
-        clip_duration = st.selectbox(t['dur_label'], [30, 45, 60], index=1)
-        clips_quantity = st.slider("Cantidad de clips a extraer", min_value=5, max_value=25, value=15)
-        st.markdown("---")
-        
-        if st.button(t['logout']):
-            st.session_state["logged_in"] = False
-            st.session_state["username"] = ""
-            st.session_state["role"] = ""
-            st.session_state["name"] = ""
-            st.rerun()
-
-    st.markdown(f"## {t['title']}")
-    st.markdown(f"### {t['subtitle']}")
-    st.markdown(f'<p class="small">{t["desc"]}</p>', unsafe_allow_html=True)
-    st.divider()
-
-    # --- PANEL EXCLUSIVO DE ADMINISTRADOR PARA APROBAR USUARIOS ---
-    if st.session_state["role"] == "admin":
-        with st.expander("🛡️ Panel de Control de Propietario (Aprobación de Usuarios)", expanded=True):
-            st.write("Aquí puedes ver y admitir a los nuevos usuarios que se han registrado:")
-            
-            pending_users = [u for u, data in users.items() if not data.get("approved", False) and u != "yariel"]
-            
-            if not pending_users:
-                st.success("No hay solicitudes de nuevos usuarios pendientes.")
-            else:
-                for p_user in pending_users:
-                    col_p1, col_p2, col_p3 = st.columns([2, 2, 1])
-                    with col_p1:
-                        st.text(f"Usuario: {p_user} ({users[p_user]['name'])})")
-                    with col_p2:
-                        if st.button(f"✅ Admitir a {p_user}", key=f"approve_{p_user}"):
-                            users[p_user]["approved"] = True
-                            save_users(users)
-                            st.success(f"¡Usuario {p_user} admitido con éxito!")
-                            st.rerun()
-                    with col_p3:
-                        if st.button(f"❌ Rechazar", key=f"delete_{p_user}"):
-                            del users[p_user]
-                            save_users(users)
-                            st.warning(f"Usuario {p_user} eliminado.")
-                            st.rerun()
-            st.markdown("---")
-
-    tab_url, tab_upload = st.tabs([t['tab_url'], t['tab_upload']])
-
-    video_path = None
-    work_dir = tempfile.mkdtemp(prefix="clipsrd_")
-
-    with tab_url:
-        st.markdown(f"#### {t['url_title']}")
-        url = st.text_input("URL", placeholder="https://www.youtube.com/watch?v=...", label_visibility="collapsed")
-        if st.button(t['url_btn'], key="get_video"):
-            if not url.strip():
-                st.warning("Introduce una URL válida.")
-            else:
-                try:
-                    opts = {
-                        "format": "bestvideo[height<=720]+bestaudio/best[height<=720]/best",
-                        "outtmpl": str(Path(work_dir) / "source.%(ext)s"),
-                        "noplaylist": True,
-                        "quiet": True,
-                        "merge_output_format": "mp4",
-                    }
-                    with st.spinner("Descargando video largo..."):
-                        with yt_dlp.YoutubeDL(opts) as ydl:
-                            info = ydl.extract_info(url.strip(), download=True)
-                            video_path = ydl.prepare_filename(info)
-                    st.session_state["clipsrd_source"] = video_path
-                    st.success(f"¡Video importado con éxito: {info.get('title', 'Video')}!")
-                except Exception as e:
-                    st.error(f"Error al importar: {e}")
-
-    with tab_upload:
-        st.markdown(f"#### {t['upload_title']}")
-        uploaded = st.file_uploader("Archivo", type=["mp4", "mov", "mkv", "webm"], label_visibility="collapsed")
-        if uploaded is not None:
-            uploaded_path = Path(work_dir) / uploaded.name
-            uploaded_path.write_bytes(uploaded.getbuffer())
-            st.session_state["clipsrd_source"] = str(uploaded_path)
-            st.success("¡Archivo cargado con éxito!")
-
-    video_path = st.session_state.get("clipsrd_source")
-
-    if video_path and Path(video_path).exists():
-        st.divider()
-        left, right = st.columns([1.15, 0.85], gap="large")
-        
-        with left:
-            st.markdown(f"### {t['preview']}")
-            st.video(video_path)
-            
-        with right:
-            st.markdown(f"### {t['editor']}")
-            st.info(f"Se extraerán automáticamente **{clips_quantity} clips** de **{clip_duration} segundos** distribuidos a lo largo de toda la grabación.")
-            crop = st.selectbox(t['crop_label'], ["Centro", "Priorizar lado izquierdo", "Priorizar lado derecho"])
-            
-            st.markdown("<br>", unsafe_allow_html=True)
-            if st.button(t['render_btn'], key="render_batch"):
-                output_clips = []
-                
-                probe_cmd = ["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", video_path]
-                try:
-                    dur_res = subprocess.run(probe_cmd, capture_output=True, text=True, check=True)
-                    total_duration = float(dur_res.stdout.strip())
-                except:
-                    total_duration = 2700
-
-                step = max(30.0, (total_duration - clip_duration) / max(1, clips_quantity))
-                
-                progress_bar = st.progress(0)
-                status_text = st.empty()
-
-                for i in range(clips_quantity):
-                    start_time = i * step
-                    if start_time + clip_duration > total_duration:
-                        break
-                        
-                    clip_filename = str(Path(work_dir) / f"auto_clip_{i+1}.mp4")
-                    
-                    status_text.text(f"Generando clip {i+1} de {clips_quantity} (Minuto {int(start_time//60)})...")
-                    
-                    if aspect.startswith("9:16"):
-                        x_expr = "iw/2-ih*9/32" if crop == "Centro" else ("0" if crop == "Priorizar lado izquierdo" else "iw-ih*9/16")
-                        vf = f"crop='ih*9/16':'ih':{x_expr}:0,scale=1080:1920"
-                    else:
-                        vf = "scale=1080:1080:force_original_aspect_ratio=decrease,pad=1080:1080:(ow-iw)/2:(oh-ih)/2"
-                    
-                    command = ["ffmpeg", "-y", "-ss", str(start_time), "-i", video_path, "-t", str(clip_duration),
-                               "-vf", vf, "-c:v", "libx264", "-preset", "veryfast", "-crf", "22",
-                               "-c:a", "aac", "-b:a", "128k", clip_filename]
-                    try:
-                        subprocess.run(command, capture_output=True, text=True, check=True)
-                        output_clips.append(clip_filename)
-                    except:
-                        pass
-                        
-                    progress_bar.progress((i + 1) / clips_quantity)
-                
-                status_text.empty()
-                progress_bar.empty()
-                st.session_state["clipsrd_batch_outputs"] = output_clips
-                st.success("¡Lote de clips generado correctamente!")
-
-    batch_outputs = st.session_state.get("clipsrd_batch_outputs", [])
-    if batch_outputs:
-        st.divider()
-        st.markdown(f"## {t['result_title']}")
-        st.write(f"Se han procesado **{len(batch_outputs)} clips verticales** listos para tus redes sociales:")
-        
-        cols = st.columns(3)
-        for idx, clip_file in enumerate(batch_outputs):
-            with cols[idx % 3]:
-                st.markdown(f"**Clip #{idx+1}**")
-                st.video(clip_file)
-                st.download_button(
-                    f"⬇️ Descargar Clip #{idx+1}",
-                    data=Path(clip_file).read_bytes(),
-                    file_name=f"ClipsRD_parte_{idx+1}.mp4",
-                    mime="video/mp4",
-                    key=f"dl_{idx}"
-                )
-                st.markdown("---")
-                
+        st.markdown(f"## {t['sidebar_config
