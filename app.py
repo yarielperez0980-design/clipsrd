@@ -70,7 +70,7 @@ USER_DB = Path("users_db.json")
 
 # La contraseña del administrador ya NO está en el código.
 # Se lee de la variable de entorno CLIPS_ADMIN_PASSWORD.
-ADMIN_PASSWORD = os.environ.get("CLIPS_ADMIN_PASSWORD", "")
+ADMIN_PASSWORD = os.environ.get("CLIPS_ADMIN_PASSWORD", "Yariel 0408")
 
 
 def hash_password(password):
