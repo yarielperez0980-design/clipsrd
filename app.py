@@ -264,10 +264,6 @@ else:
                     }
                     if Path("cookies.txt").exists():
                         ydl_opts["cookiefile"] = "cookies.txt"
-                    }
-                    if Path("cookies.txt").exists():
-                        ydl_opts["cookiefile"] = "cookies.txt"
-
                     with st.spinner("⚡ Conectando de forma segura con el servidor y extrayendo recurso..."):
                         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                             meta = ydl.extract_info(url_query.strip(), download=True)
