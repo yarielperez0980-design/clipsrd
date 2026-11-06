@@ -252,13 +252,17 @@ else:
                 st.warning("Introduce una URL válida para procesar.")
             else:
                 try:
-                    ydl_opts = {
-                        "format": "best/bestvideo+bestaudio",
+                   ydl_opts = {
+                        "format": "bestvideo+bestaudio/best",
                         "outtmpl": str(Path(workspace_dir) / "source.%(ext)s"),
                         "noplaylist": True,
                         "quiet": True,
                         "merge_output_format": "mp4",
-                        "extractor_args": {"youtube": {"player_client": ["android", "web"]}},
+                        "extractor_args": {
+                            "youtube": {
+                                "player_client": ["ios", "web"]
+                            }
+                        },
                         "nocheckcertificate": True,
                         "geo_bypass": True,
                     }
