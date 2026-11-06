@@ -7,145 +7,98 @@ from pathlib import Path
 import hashlib
 
 # --- CONFIGURACIÓN DE PÁGINA ---
-st.set_page_config(page_title="Clips RD", page_icon="🎬", layout="wide")
+st.set_page_config(
+    page_title="Clips RD AI Studio",
+    page_icon="⚡",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
-# --- DICCIONARIO DE TRADUCCIONES (MULTIDIOMA) ---
-LANGUAGES = {
-    "Español": {
-        "title": "🎬 Clips RD",
-        "subtitle": "Generador Masivo de Clips Inteligentes para Redes",
-        "desc": "Estudio de recorte masivo • Relación 9:16 • Alta Definición MP4 (1080 × 1920)",
-        "sidebar_config": "⚙️ Configuración Masiva",
-        "lang_label": "🌐 Idioma / Language",
-        "aspect_label": "Formato de salida",
-        "dur_label": "Duración de cada clip",
-        "welcome": "Hola",
-        "admin_role": "🛡️ Rol: Propietario (Administrador)",
-        "user_role": "👤 Rol: Usuario Estándar",
-        "logout": "Cerrar sesión",
-        "tab_url": "🔗 Importar desde URL",
-        "tab_upload": "📁 Subir archivo local",
-        "url_title": "Pega el enlace de la plataforma compatible",
-        "url_btn": "⬇️ Obtener y analizar video",
-        "upload_title": "Sube tu propio archivo de video",
-        "preview": "👀 Vista previa del material",
-        "editor": "✂️ Generador Automático de Clips en Lote",
-        "clip_dur": "Duración de los clips (segundos)",
-        "crop_label": "Encuadre vertical inteligente",
-        "render_btn": "🚀 Extraer y generar múltiples clips",
-        "success_render": "¡Proceso masivo completado con éxito!",
-        "result_title": "🚀 Tus Clips Están Listos para Descargar",
-        "login_title": "Clips RD - Acceso",
-        "login_sub": "Plataforma de Recorte Masivo",
-        "tab_login": "🔑 Iniciar Sesión",
-        "tab_reg": "📝 Registrarse",
-        "tab_rec": "🔄 Recuperar Contraseña",
-        "user": "Usuario",
-        "pass": "Contraseña",
-        "enter": "Entrar",
-        "name_full": "Nombre completo",
-        "new_user": "Nombre de usuario nuevo",
-        "new_pass": "Contraseña nueva",
-        "create_acc": "Crear Cuenta"
-    },
-    "English": {
-        "title": "🎬 Clips RD",
-        "subtitle": "Massive Smart Clip Generator for Social Media",
-        "desc": "Mass cutting studio • 9:16 Ratio • High Definition MP4 (1080 × 1920)",
-        "sidebar_config": "⚙️ Mass Settings",
-        "lang_label": "🌐 Language",
-        "aspect_label": "Output format",
-        "dur_label": "Clip duration",
-        "welcome": "Hello",
-        "admin_role": "🛡️ Role: Owner (Administrator)",
-        "user_role": "👤 Role: Standard User",
-        "logout": "Log out",
-        "tab_url": "🔗 Import from URL",
-        "tab_upload": "📁 Upload local file",
-        "url_title": "Paste supported platform link",
-        "url_btn": "⬇️ Fetch and analyze video",
-        "upload_title": "Upload your own video file",
-        "preview": "👀 Material preview",
-        "editor": "✂️ Automated Batch Clip Generator",
-        "clip_dur": "Clip duration (seconds)",
-        "crop_label": "Smart vertical framing",
-        "render_btn": "🚀 Extract and generate multiple clips",
-        "success_render": "Massive processing completed successfully!",
-        "result_title": "🚀 Your Clips Are Ready to Download",
-        "login_title": "Clips RD - Access",
-        "login_sub": "Mass Cutting Platform",
-        "tab_login": "🔑 Log In",
-        "tab_reg": "📝 Sign Up",
-        "tab_rec": "🔄 Recover Password",
-        "user": "Username",
-        "pass": "Password",
-        "enter": "Enter",
-        "name_full": "Full name",
-        "new_user": "New username",
-        "new_pass": "New password",
-        "create_acc": "Create Account"
-    }
-}
-
-# --- DISEÑO Y ESTÉTICA (UI/UX) ---
+# --- ESTILOS VISUALES ESTILO CHGPT / MODERNO ---
 st.markdown("""
 <style>
+/* Fondo general estilo ChatGPT Dark Mode */
 .stApp {
-    background: radial-gradient(circle at 15% 0%, #1e1138 0, #0b0b12 40%, #050508 100%);
-    color: #f5f3ff;
+    background-color: #212121;
+    color: #ececec;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
+
+/* Sidebar oscuro y limpio */
 [data-testid="stSidebar"] {
-    background: #0f0e17;
-    border-right: 1px solid #2a2242;
+    background-color: #171717;
+    border-right: 1px solid #2f2f2f;
 }
+
+[data-testid="stSidebar"] * {
+    color: #ececec !important;
+}
+
+/* Títulos y textos */
 h1, h2, h3 {
-    color: #f7f2ff !important;
-    font-family: 'Inter', sans-serif;
-    letter-spacing: -0.5px;
-}
-div.stButton > button, div.stDownloadButton > button {
-    background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
-    color: white;
-    border: none;
-    border-radius: 14px;
+    color: #ffffff !important;
     font-weight: 600;
-    min-height: 3rem;
-    box-shadow: 0 4px 20px rgba(139, 92, 246, 0.35);
-    transition: all 0.3s ease;
 }
-div.stButton > button:hover, div.stDownloadButton > button:hover {
-    background: linear-gradient(135deg, #9333ea 0%, #7c3aed 100%);
-    border: 1px solid #c4b5fd;
-    box-shadow: 0 6px 25px rgba(139, 92, 246, 0.5);
-    color: white;
-    transform: translateY(-1px);
+
+/* Botones principales estilo GPT */
+div.stButton > button {
+    background-color: #2f2f2f;
+    color: #ffffff;
+    border: 1px solid #424242;
+    border-radius: 8px;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    transition: all 0.2s ease;
 }
+
+div.stButton > button:hover {
+    background-color: #3f3f3f;
+    border-color: #525252;
+}
+
+/* Botón de acción principal (Primary) */
+div.stButton > button[kind="primary"], .stDownloadButton > button {
+    background-color: #ffffff !important;
+    color: #212121 !important;
+    border: none !important;
+    font-weight: 600;
+}
+
+div.stButton > button[kind="primary"]:hover, .stDownloadButton > button:hover {
+    background-color: #e0e0e0 !important;
+}
+
+/* Entradas de texto estilo chat box */
 .stTextInput input, .stSelectbox div[data-baseweb="select"] {
-    background-color: #161325 !important;
-    border: 1px solid #322852 !important;
-    color: #f5f3ff !important;
-    border-radius: 10px !important;
+    background-color: #2f2f2f !important;
+    border: 1px solid #424242 !important;
+    color: #ffffff !important;
+    border-radius: 8px !important;
 }
-.small {
-    color: #9ca3af;
-    font-size: 0.9rem;
+
+/* Contenedores y tarjetas */
+.gpt-card {
+    background-color: #2f2f2f;
+    border: 1px solid #3f3f3f;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 15px;
 }
 </style>
 """, unsafe_allow_html=True)
 
-# --- GESTIÓN DE USUARIOS LOCAL (JSON) ---
+# --- GESTIÓN DE BASE DE DATOS LOCAL (USUARIOS Y SEGURIDAD) ---
 USER_DB = Path("users_db.json")
 
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
 def load_users():
-    default_users = {
+    default_admin = {
         "yariel": {
             "password": hash_password("YarielY0408$"),
             "role": "admin",
             "name": "Yariel Pérez",
-            "hint": "Tu nombre y tu año",
             "approved": True
         }
     }
@@ -153,13 +106,13 @@ def load_users():
         try:
             with open(USER_DB, "r") as f:
                 data = json.load(f)
-                data["yariel"] = default_users["yariel"]
+                data["yariel"] = default_admin["yariel"]
                 return data
         except:
-            return default_users
+            return default_admin
     else:
-        save_users(default_users)
-        return default_users
+        save_users(default_admin)
+        return default_admin
 
 def save_users(users_dict):
     with open(USER_DB, "w") as f:
@@ -167,6 +120,7 @@ def save_users(users_dict):
 
 users = load_users()
 
+# Inicializar estados de sesión
 if "logged_in" not in st.session_state:
     st.session_state["logged_in"] = False
 if "username" not in st.session_state:
@@ -176,65 +130,235 @@ if "role" not in st.session_state:
 if "name" not in st.session_state:
     st.session_state["name"] = ""
 
-with st.sidebar:
-    selected_lang = st.selectbox("🌐 Idioma / Language", list(LANGUAGES.keys()), index=0)
-
-t = LANGUAGES.get(selected_lang, LANGUAGES["Español"])
-
-# --- PANTALLA DE AUTENTICACIÓN ---
+# --- FLUJO DE AUTENTICACIÓN (PANTALLA DE ACCESO SEGURA) ---
 if not st.session_state["logged_in"]:
     st.markdown("<br><br>", unsafe_allow_html=True)
-    col1, col2, col3 = st.columns([1, 1.5, 1])
+    col1, col2, col3 = st.columns([1, 1.2, 1])
     
     with col2:
-        st.markdown(f"""
-            <div style="background: rgba(25, 22, 38, 0.9); padding: 30px; border-radius: 20px; border: 1px solid #36285c; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-                <h2 style="text-align: center; margin-bottom: 0px;">{t['title']}</h2>
-                <p style="text-align: center; color: #a78bfa; font-size: 0.85rem;">{t['login_sub']}</p>
+        st.markdown("""
+            <div style="text-align: center; margin-bottom: 25px;">
+                <h1 style="font-size: 2rem; margin-bottom: 5px;">⚡ Clips RD Studio</h1>
+                <p style="color: #9e9e9e; font-size: 0.9rem;">Sistema Seguro de Generación Inteligente</p>
             </div>
         """, unsafe_allow_html=True)
         
-        auth_tab1, auth_tab2, auth_tab3 = st.tabs([t['tab_login'], t['tab_reg'], t['tab_rec']])
+        tab_login, tab_reg = st.tabs(["🔑 Iniciar Sesión", "📝 Registrarse"])
         
-        with auth_tab1:
+        with tab_login:
             st.markdown("<br>", unsafe_allow_html=True)
-            login_user = st.text_input(t['user'], key="login_u")
-            login_pass = st.text_input(t['pass'], type="password", key="login_p")
+            u_input = st.text_input("Usuario", key="l_user")
+            p_input = st.text_input("Contraseña", type="password", key="l_pass")
             
-            if st.button(t['enter'], key="btn_login"):
-                login_user_clean = login_user.strip().lower()
-                if login_user_clean in users and users[login_user_clean]["password"] == hash_password(login_pass):
-                    if users[login_user_clean].get("approved", False):
+            if st.button("Acceder al Sistema", use_container_width=True, type="primary"):
+                clean_u = u_input.strip().lower()
+                if clean_u in users and users[clean_u]["password"] == hash_password(p_input):
+                    if users[clean_u].get("approved", False):
                         st.session_state["logged_in"] = True
-                        st.session_state["username"] = login_user_clean
-                        st.session_state["role"] = users[login_user_clean]["role"]
-                        st.session_state["name"] = users[login_user_clean]["name"]
+                        st.session_state["username"] = clean_u
+                        st.session_state["role"] = users[clean_u]["role"]
+                        st.session_state["name"] = users[clean_u]["name"]
                         st.rerun()
                     else:
-                        st.warning("⏳ Tu cuenta está pendiente de aprobación por el administrador.")
+                        st.warning("⏳ Tu cuenta está pendiente de aprobación por seguridad del administrador.")
                 else:
-                    st.error("⚠️ Usuario o contraseña incorrectos.")
+                    st.error("⚠️ Credenciales inválidas o acceso no autorizado.")
                     
-        with auth_tab2:
+        with tab_reg:
             st.markdown("<br>", unsafe_allow_html=True)
-            reg_name = st.text_input(t['name_full'], key="reg_n")
-            reg_user = st.text_input(t['new_user'], key="reg_u")
-            reg_pass = st.text_input(t['new_pass'], type="password", key="reg_p")
-            reg_hint = st.text_input("Pista para recordar contraseña", key="reg_h", placeholder="Ej. Mi primer perro")
+            r_name = st.text_input("Nombre completo", key="r_name")
+            r_user = st.text_input("Nombre de usuario nuevo", key="r_user")
+            r_pass = st.text_input("Contraseña segura", type="password", key="r_pass")
             
-            if st.button(t['create_acc'], key="btn_reg"):
-                reg_user_clean = reg_user.strip().lower()
-                if not reg_name or not reg_user_clean or not reg_pass:
-                    st.warning("Por favor, completa todos los campos.")
-                elif reg_user_clean == "yariel":
-                    st.error("Este nombre de usuario está reservado para el propietario.")
-                elif reg_user_clean in users:
-                    st.error("El nombre de usuario ya existe.")
+            if st.button("Solicitar Registro", use_container_width=True):
+                clean_r = r_user.strip().lower()
+                if not r_name or not clean_r or not r_pass:
+                    st.warning("Completa todos los campos obligatorios.")
+                elif clean_r == "yariel":
+                    st.error("Nombre reservado.")
+                elif clean_r in users:
+                    st.error("El usuario ya existe.")
                 else:
-                    users[reg_user_clean] = {
-                        "password": hash_password(reg_pass),
+                    users[clean_r] = {
+                        "password": hash_password(r_pass),
                         "role": "user",
-                        "name": reg_name.strip(),
-                        "hint": reg_hint.strip() if reg_hint else "Sin pista",
+                        "name": r_name.strip(),
                         "approved": False
                     }
+                    save_users(users)
+                    st.success("¡Solicitud enviada! El administrador debe admitirte para poder entrar.")
+
+else:
+    # --- APLICACIÓN PRINCIPAL (ESTILO SIDEBAR TIPO CHATGPT) ---
+    with st.sidebar:
+        st.markdown(f"### ⚡ Workspace")
+        st.markdown(f"👤 **{st.session_state['name']}**")
+        role_badge = "🛡️ Administrador" if st.session_state["role"] == "admin" else "👤 Operador"
+        st.markdown(f"<span style='color: #9e9e9e; font-size: 0.8rem;'>{role_badge}</span>", unsafe_allow_html=True)
+        
+        st.markdown("---")
+        st.markdown("### 🎛️ Parámetros de Comando")
+        
+        # Comandos / Opciones avanzadas
+        command_mode = st.selectbox("Modo de Operación", ["🎬 Generación Masiva de Clips", "🔗 Analizador de Enlace Directo", "📁 Gestor de Archivos Locales"])
+        aspect_ratio = st.selectbox("Relación de Aspecto", ["9:16 Vertical (TikTok/Shorts)", "1:1 Cuadrado", "16:9 Horizontal"])
+        clip_sec = st.slider("Duración por Clip (seg)", 15, 60, 30)
+        total_clips = st.slider("Cantidad objetivo de clips", 5, 20, 10)
+        
+        st.markdown("---")
+        if st.button("🚪 Cerrar Sesión", use_container_width=True):
+            st.session_state["logged_in"] = False
+            st.rerun()
+
+    # Interfaz Central Principal
+    st.markdown("## 🤖 Clips RD — Command Center")
+    st.markdown("<p style='color: #9e9e9e;'>Panel de control inteligente para procesamiento masivo de video mediante comandos seguros.</p>", unsafe_allow_html=True)
+    st.divider()
+
+    # Panel exclusivo de administración para aprobar usuarios
+    if st.session_state["role"] == "admin":
+        with st.expander("🛡️ Panel de Seguridad y Auditoría (Aprobación de Usuarios)", expanded=False):
+            pending = [u for u, data in users.items() if not data.get("approved", False) and u != "yariel"]
+            if not pending:
+                st.info("No hay solicitudes de acceso pendientes de aprobación.")
+            else:
+                for p_u in pending:
+                    c1, c2, c3 = st.columns([2, 2, 1])
+                    with c1:
+                        st.text(f"Usuario: {p_u} ({users[p_u]['name']})")
+                    with c2:
+                        if st.button(f"✅ Aprobar", key=f"app_{p_u}"):
+                            users[p_u]["approved"] = True
+                            save_users(users)
+                            st.rerun()
+                    with c3:
+                        if st.button(f"❌ Denegar", key=f"del_{p_u}"):
+                            del users[p_u]
+                            save_users(users)
+                            st.rerun()
+        st.markdown("")
+
+    # --- ZONA DE ENTRADA TIPO CHAT / COMANDOS ---
+    st.markdown("### 📥 Inserción de Fuente")
+    input_source_type = st.radio("Selecciona método de entrada:", ["Pegar URL de YouTube / Plataforma", "Subir Archivo Local"], horizontal=True)
+
+    video_source_path = None
+    workspace_dir = tempfile.mkdtemp(prefix="gpt_clips_")
+
+    if "Pegar URL" in input_source_type:
+        url_query = st.text_input("Comando / URL del recurso", placeholder="Ej. /url https://www.youtube.com/watch?v=...")
+        if st.button("🚀 Ejecutar Análisis de URL", type="primary"):
+            if not url_query.strip():
+                st.warning("Introduce una URL válida para procesar.")
+            else:
+                try:
+                    ydl_opts = {
+                        "format": "best",
+                        "outtmpl": str(Path(workspace_dir) / "source.%(ext)s"),
+                        "noplaylist": True,
+                        "quiet": True,
+                        "merge_output_format": "mp4",
+                        "extractor_args": {"youtube": {"player_client": ["android", "web"]}},
+                        "nocheckcertificate": True,
+                        "geo_bypass": True,
+                    }
+                    if Path("cookies.txt").exists():
+                        ydl_opts["cookiefile"] = "cookies.txt"
+
+                    with st.spinner("⚡ Conectando de forma segura con el servidor y extrayendo recurso..."):
+                        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                            meta = ydl.extract_info(url_query.strip(), download=True)
+                            video_source_path = ydl.prepare_filename(meta)
+                    st.session_state["active_video"] = video_source_path
+                    st.success(f"¡Recurso vinculado con éxito: {meta.get('title', 'Video')}!")
+                except Exception as ex:
+                    st.error(f"Error crítico en el comando de extracción: {ex}")
+    else:
+        uploaded_file = st.file_uploader("Sube tu archivo de video local", type=["mp4", "mov", "mkv"])
+        if uploaded_file is not None:
+            dest_file = Path(workspace_dir) / uploaded_file.name
+            dest_file.write_bytes(uploaded_file.getbuffer())
+            st.session_state["active_video"] = str(dest_file)
+            st.success("¡Archivo cargado localmente con éxito!")
+
+    video_source_path = st.session_state.get("active_video")
+
+    # --- PROCESAMIENTO Y GENERACIÓN DE CLIPS ---
+    if video_source_path and Path(video_source_path).exists():
+        st.divider()
+        col_prev, col_actions = st.columns([1.1, 0.9], gap="large")
+        
+        with col_prev:
+            st.markdown("#### 📺 Vista Previa del Recurso")
+            st.video(video_source_path)
+            
+        with col_actions:
+            st.markdown("#### ⚙️ Consola de Recorte Masivo")
+            st.info(f"Se generarán **{total_clips} clips** automáticos de **{clip_sec} segundos** aplicando el formato seleccionado.")
+            
+            if st.button("⚡ Iniciar Procesamiento por Lotes", type="primary", use_container_width=True):
+                rendered_files = []
+                
+                # Obtener duración total con ffprobe
+                probe_process = ["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", video_source_path]
+                try:
+                    dur_res = subprocess.run(probe_process, capture_output=True, text=True, check=True)
+                    video_duration = float(dur_res.stdout.strip())
+                except:
+                    video_duration = 1800
+
+                time_step = max(20.0, (video_duration - clip_sec) / max(1, total_clips))
+                progress_bar = st.progress(0)
+                status_box = st.empty()
+
+                for idx in range(total_clips):
+                    start_sec = idx * time_step
+                    if start_sec + clip_sec > video_duration:
+                        break
+                        
+                    output_filename = str(Path(workspace_dir) / f"clip_result_{idx+1}.mp4")
+                    status_box.text(f"Procesando clip {idx+1} de {total_clips} (Minuto {int(start_sec//60)})...")
+                    
+                    if "9:16" in aspect_ratio:
+                        vf_filter = "crop='ih*9/16':'ih':iw/2-ih*9/32:0,scale=1080:1920"
+                    else:
+                        vf_filter = "scale=1080:1080:force_original_aspect_ratio=decrease,pad=1080:1080:(ow-iw)/2:(oh-ih)/2"
+                    
+                    ffmpeg_command = [
+                        "ffmpeg", "-y", "-ss", str(start_sec), "-i", video_source_path, "-t", str(clip_sec),
+                        "-vf", vf_filter, "-c:v", "libx264", "-preset", "veryfast", "-crf", "22",
+                        "-c:a", "aac", "-b:a", "128k", output_filename
+                    ]
+                    try:
+                        subprocess.run(ffmpeg_command, capture_output=True, text=True, check=True)
+                        rendered_files.append(output_filename)
+                    except:
+                        pass
+                        
+                    progress_bar.progress((idx + 1) / total_clips)
+                
+                status_box.empty()
+                progress_bar.empty()
+                st.session_state["rendered_clips"] = rendered_files
+                st.success("¡Lote completado con éxito!")
+
+    # --- SALIDA Y DESCARGA DE RESULTADOS ---
+    final_clips_list = st.session_state.get("rendered_clips", [])
+    if final_clips_list:
+        st.divider()
+        st.markdown("### 🚀 Resultados Listos para Descargar")
+        st.write(f"Se han obtenido **{len(final_clips_list)} clips optimizados** para su distribución:")
+        
+        grid_cols = st.columns(3)
+        for i, clip_file_path in enumerate(final_clips_list):
+            with grid_cols[i % 3]:
+                st.markdown(f"**Clip #{i+1}**")
+                st.video(clip_file_path)
+                st.download_button(
+                    f"⬇️ Descargar Clip #{i+1}",
+                    data=Path(clip_file_path).read_bytes(),
+                    file_name=f"ClipsRD_GPT_part_{i+1}.mp4",
+                    mime="video/mp4",
+                    key=f"dl_gpt_{i}"
+                )
+                st.markdown("---")
