@@ -339,11 +339,17 @@ else:
                         "noplaylist": True,
                         "quiet": True,
                         "merge_output_format": "mp4",
-                        "extractor_args": {"youtube": {"player_client": ["android", "web"]}},
+                        "extractor_args": {
+                            "youtube": {
+                                "player_client": ["ios", "android", "web"]
+                            }
+                        },
                         "nocheckcertificate": True,
                         "geo_bypass": True,
                     }
-                    }
+                    if Path("cookies.txt").exists():
+                        opts["cookiefile"] = "cookies.txt"
+
                     with st.spinner("Descargando video largo..."):
                         with yt_dlp.YoutubeDL(opts) as ydl:
                             info = ydl.extract_info(url.strip(), download=True)
