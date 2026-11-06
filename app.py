@@ -333,12 +333,16 @@ else:
                 st.warning("Introduce una URL válida.")
             else:
                 try:
-                    opts = {
+                       opts = {
                         "format": "bestvideo[height<=720]+bestaudio/best[height<=720]/best",
                         "outtmpl": str(Path(work_dir) / "source.%(ext)s"),
                         "noplaylist": True,
                         "quiet": True,
                         "merge_output_format": "mp4",
+                        "extractor_args": {"youtube": {"player_client": ["android", "web"]}},
+                        "nocheckcertificate": True,
+                        "geo_bypass": True,
+                    }
                     }
                     with st.spinner("Descargando video largo..."):
                         with yt_dlp.YoutubeDL(opts) as ydl:
