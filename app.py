@@ -17,30 +17,22 @@ st.set_page_config(
 # --- ESTILOS VISUALES ESTILO CHGPT / MODERNO ---
 st.markdown("""
 <style>
-/* Fondo general estilo ChatGPT Dark Mode */
 .stApp {
     background-color: #212121;
     color: #ececec;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
-
-/* Sidebar oscuro y limpio */
 [data-testid="stSidebar"] {
     background-color: #171717;
     border-right: 1px solid #2f2f2f;
 }
-
 [data-testid="stSidebar"] * {
     color: #ececec !important;
 }
-
-/* Títulos y textos */
 h1, h2, h3 {
     color: #ffffff !important;
     font-weight: 600;
 }
-
-/* Botones principales estilo GPT */
 div.stButton > button {
     background-color: #2f2f2f;
     color: #ffffff;
@@ -50,39 +42,24 @@ div.stButton > button {
     padding: 0.5rem 1rem;
     transition: all 0.2s ease;
 }
-
 div.stButton > button:hover {
     background-color: #3f3f3f;
     border-color: #525252;
 }
-
-/* Botón de acción principal (Primary) */
 div.stButton > button[kind="primary"], .stDownloadButton > button {
     background-color: #ffffff !important;
     color: #212121 !important;
     border: none !important;
     font-weight: 600;
 }
-
 div.stButton > button[kind="primary"]:hover, .stDownloadButton > button:hover {
     background-color: #e0e0e0 !important;
 }
-
-/* Entradas de texto estilo chat box */
 .stTextInput input, .stSelectbox div[data-baseweb="select"] {
     background-color: #2f2f2f !important;
     border: 1px solid #424242 !important;
     color: #ffffff !important;
     border-radius: 8px !important;
-}
-
-/* Contenedores y tarjetas */
-.gpt-card {
-    background-color: #2f2f2f;
-    border: 1px solid #3f3f3f;
-    padding: 20px;
-    border-radius: 12px;
-    margin-bottom: 15px;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -120,7 +97,6 @@ def save_users(users_dict):
 
 users = load_users()
 
-# Inicializar estados de sesión
 if "logged_in" not in st.session_state:
     st.session_state["logged_in"] = False
 if "username" not in st.session_state:
@@ -130,7 +106,7 @@ if "role" not in st.session_state:
 if "name" not in st.session_state:
     st.session_state["name"] = ""
 
-# --- FLUJO DE AUTENTICACIÓN (PANTALLA DE ACCESO SEGURA) ---
+# --- FLUJO DE AUTENTICACIÓN ---
 if not st.session_state["logged_in"]:
     st.markdown("<br><br>", unsafe_allow_html=True)
     col1, col2, col3 = st.columns([1, 1.2, 1])
@@ -189,7 +165,7 @@ if not st.session_state["logged_in"]:
                     st.success("¡Solicitud enviada! El administrador debe admitirte para poder entrar.")
 
 else:
-    # --- APLICACIÓN PRINCIPAL (ESTILO SIDEBAR TIPO CHATGPT) ---
+    # --- APLICACIÓN PRINCIPAL ---
     with st.sidebar:
         st.markdown(f"### ⚡ Workspace")
         st.markdown(f"👤 **{st.session_state['name']}**")
@@ -199,8 +175,6 @@ else:
         st.markdown("---")
         st.markdown("### 🎛️ Parámetros de Comando")
         
-        # Comandos / Opciones avanzadas
-        command_mode = st.selectbox("Modo de Operación", ["🎬 Generación Masiva de Clips", "🔗 Analizador de Enlace Directo", "📁 Gestor de Archivos Locales"])
         aspect_ratio = st.selectbox("Relación de Aspecto", ["9:16 Vertical (TikTok/Shorts)", "1:1 Cuadrado", "16:9 Horizontal"])
         clip_sec = st.slider("Duración por Clip (seg)", 15, 60, 30)
         total_clips = st.slider("Cantidad objetivo de clips", 5, 20, 10)
@@ -210,12 +184,10 @@ else:
             st.session_state["logged_in"] = False
             st.rerun()
 
-    # Interfaz Central Principal
     st.markdown("## 🤖 Clips RD — Command Center")
     st.markdown("<p style='color: #9e9e9e;'>Panel de control inteligente para procesamiento masivo de video mediante comandos seguros.</p>", unsafe_allow_html=True)
     st.divider()
 
-    # Panel exclusivo de administración para aprobar usuarios
     if st.session_state["role"] == "admin":
         with st.expander("🛡️ Panel de Seguridad y Auditoría (Aprobación de Usuarios)", expanded=False):
             pending = [u for u, data in users.items() if not data.get("approved", False) and u != "yariel"]
@@ -238,7 +210,6 @@ else:
                             st.rerun()
         st.markdown("")
 
-    # --- ZONA DE ENTRADA TIPO CHAT / COMANDOS ---
     st.markdown("### 📥 Inserción de Fuente")
     input_source_type = st.radio("Selecciona método de entrada:", ["Pegar URL de YouTube / Plataforma", "Subir Archivo Local"], horizontal=True)
 
@@ -246,13 +217,14 @@ else:
     workspace_dir = tempfile.mkdtemp(prefix="gpt_clips_")
 
     if "Pegar URL" in input_source_type:
-        url_query = st.text_input("Comando / URL del recurso", placeholder="Ej. /url https://www.youtube.com/watch?v=...")
+        url_query = st.text_input("Comando / URL del recurso", placeholder="Ej. https://www.youtube.com/watch?v=...")
         if st.button("🚀 Ejecutar Análisis de URL", type="primary"):
             if not url_query.strip():
                 st.warning("Introduce una URL válida para procesar.")
             else:
                 try:
-                   ydl_opts = {
+                    # Configuración robusta y reciente para yt-dlp con cookies y bypass
+                    ydl_opts = {
                         "format": "bestvideo+bestaudio/best",
                         "outtmpl": str(Path(workspace_dir) / "source.%(ext)s"),
                         "noplaylist": True,
@@ -266,9 +238,9 @@ else:
                         "nocheckcertificate": True,
                         "geo_bypass": True,
                     }
-                      if Path("cookies.txt").exists():
-                      File "/mount/src/clipsrd/app.py"
+                    if Path("cookies.txt").exists():
                         ydl_opts["cookiefile"] = "cookies.txt"
+
                     with st.spinner("⚡ Conectando de forma segura con el servidor y extrayendo recurso..."):
                         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                             meta = ydl.extract_info(url_query.strip(), download=True)
@@ -287,7 +259,6 @@ else:
 
     video_source_path = st.session_state.get("active_video")
 
-    # --- PROCESAMIENTO Y GENERACIÓN DE CLIPS ---
     if video_source_path and Path(video_source_path).exists():
         st.divider()
         col_prev, col_actions = st.columns([1.1, 0.9], gap="large")
@@ -303,7 +274,6 @@ else:
             if st.button("⚡ Iniciar Procesamiento por Lotes", type="primary", use_container_width=True):
                 rendered_files = []
                 
-                # Obtener duración total con ffprobe
                 probe_process = ["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", video_source_path]
                 try:
                     dur_res = subprocess.run(probe_process, capture_output=True, text=True, check=True)
@@ -346,7 +316,6 @@ else:
                 st.session_state["rendered_clips"] = rendered_files
                 st.success("¡Lote completado con éxito!")
 
-    # --- SALIDA Y DESCARGA DE RESULTADOS ---
     final_clips_list = st.session_state.get("rendered_clips", [])
     if final_clips_list:
         st.divider()
