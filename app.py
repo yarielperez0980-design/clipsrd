@@ -334,7 +334,7 @@ else:
             else:
                 try:
                     opts = {
-                        "format": "bestvideo[height<=720]+bestaudio/best[height<=720]/best",
+                        "format": "best",
                         "outtmpl": str(Path(work_dir) / "source.%(ext)s"),
                         "noplaylist": True,
                         "quiet": True,
@@ -417,35 +417,3 @@ else:
                     command = ["ffmpeg", "-y", "-ss", str(start_time), "-i", video_path, "-t", str(clip_duration),
                                "-vf", vf, "-c:v", "libx264", "-preset", "veryfast", "-crf", "22",
                                "-c:a", "aac", "-b:a", "128k", clip_filename]
-                    try:
-                        subprocess.run(command, capture_output=True, text=True, check=True)
-                        output_clips.append(clip_filename)
-                    except:
-                        pass
-                        
-                    progress_bar.progress((i + 1) / clips_quantity)
-                
-                status_text.empty()
-                progress_bar.empty()
-                st.session_state["clipsrd_batch_outputs"] = output_clips
-                st.success("¡Lote de clips generado correctamente!")
-
-    batch_outputs = st.session_state.get("clipsrd_batch_outputs", [])
-    if batch_outputs:
-        st.divider()
-        st.markdown(f"## {t['result_title']}")
-        st.write(f"Se han procesado **{len(batch_outputs)} clips verticales** listos para tus redes sociales:")
-        
-        cols = st.columns(3)
-        for idx, clip_file in enumerate(batch_outputs):
-            with cols[idx % 3]:
-                st.markdown(f"**Clip #{idx+1}**")
-                st.video(clip_file)
-                st.download_button(
-                    f"⬇️ Descargar Clip #{idx+1}",
-                    data=Path(clip_file).read_bytes(),
-                    file_name=f"ClipsRD_parte_{idx+1}.mp4",
-                    mime="video/mp4",
-                    key=f"dl_{idx}"
-                )
-                st.markdown("---")
