@@ -30,10 +30,9 @@ LANGUAGES = {
         "upload_title": "Sube tu propio archivo de video",
         "preview": "👀 Vista previa del material",
         "editor": "✂️ Generador Automático de Clips en Lote",
-        "clip_count": "Cantidad de clips a generar automáticamente",
         "clip_dur": "Duración de los clips (segundos)",
         "crop_label": "Encuadre vertical inteligente",
-        "render_btn": "🚀 Extraer y generar múltiples clips (IA)",
+        "render_btn": "🚀 Extraer y generar múltiples clips",
         "success_render": "¡Proceso masivo completado con éxito!",
         "result_title": "🚀 Tus Clips Están Listos para Descargar",
         "login_title": "Clips RD - Acceso",
@@ -68,10 +67,9 @@ LANGUAGES = {
         "upload_title": "Upload your own video file",
         "preview": "👀 Material preview",
         "editor": "✂️ Automated Batch Clip Generator",
-        "clip_count": "Number of clips to generate automatically",
         "clip_dur": "Clip duration (seconds)",
         "crop_label": "Smart vertical framing",
-        "render_btn": "🚀 Extract and generate multiple clips (AI)",
+        "render_btn": "🚀 Extract and generate multiple clips",
         "success_render": "Massive processing completed successfully!",
         "result_title": "🚀 Your Clips Are Ready to Download",
         "login_title": "Clips RD - Access",
@@ -87,10 +85,8 @@ LANGUAGES = {
         "new_pass": "New password",
         "create_acc": "Create Account"
     }
-    # (Se mantienen los demás idiomas base)
 }
 
-# Para simplificar y mantener la compatibilidad, si el idioma seleccionado no está completo, usa Español por defecto.
 # --- DISEÑO Y ESTÉTICA (UI/UX) ---
 st.markdown("""
 <style>
@@ -149,14 +145,15 @@ def load_users():
             "password": hash_password("YarielY0408$"),
             "role": "admin",
             "name": "Yariel Pérez",
-            "hint": "Tu nombre y tu año"
+            "hint": "Tu nombre y tu año",
+            "approved": True
         }
     }
     if USER_DB.exists():
         try:
             with open(USER_DB, "r") as f:
                 data = json.load(f)
-                data["yariel"] = default_users["yariel"]
+                data["yariel"] = default_users["yariel"] # Asegurar que admin siempre esté aprobado
                 return data
         except:
             return default_users
@@ -205,12 +202,17 @@ if not st.session_state["logged_in"]:
             login_pass = st.text_input(t['pass'], type="password", key="login_p")
             
             if st.button(t['enter'], key="btn_login"):
-                if login_user in users and users[login_user]["password"] == hash_password(login_pass):
-                    st.session_state["logged_in"] = True
-                    st.session_state["username"] = login_user
-                    st.session_state["role"] = users[login_user]["role"]
-                    st.session_state["name"] = users[login_user]["name"]
-                    st.rerun()
+                login_user_clean = login_user.strip().lower()
+                if login_user_clean in users and users[login_user_clean]["password"] == hash_password(login_pass):
+                    # Verificar si está aprobado
+                    if users[login_user_clean].get("approved", False):
+                        st.session_state["logged_in"] = True
+                        st.session_state["username"] = login_user_clean
+                        st.session_state["role"] = users[login_user_clean]["role"]
+                        st.session_state["name"] = users[login_user_clean]["name"]
+                        st.rerun()
+                    else:
+                        st.warning("⏳ Tu cuenta está pendiente de aprobación por el administrador.")
                 else:
                     st.error("⚠️ Usuario o contraseña incorrectos.")
                     
@@ -234,10 +236,11 @@ if not st.session_state["logged_in"]:
                         "password": hash_password(reg_pass),
                         "role": "user",
                         "name": reg_name.strip(),
-                        "hint": reg_hint.strip() if reg_hint else "Sin pista"
+                        "hint": reg_hint.strip() if reg_hint else "Sin pista",
+                        "approved": False  # <-- NUEVO: Empieza desaprobado hasta que el admin lo acepte
                     }
                     save_users(users)
-                    st.success("¡Cuenta creada con éxito! Ve a la pestaña de inicio de sesión.")
+                    st.success("¡Cuenta creada! Queda pendiente de aprobación por el administrador para poder entrar.")
 
         with auth_tab3:
             st.markdown("<br>", unsafe_allow_html=True)
@@ -274,7 +277,7 @@ else:
         st.markdown("---")
         st.markdown(f"## {t['sidebar_config']}")
         aspect = st.selectbox(t['aspect_label'], ["9:16 Vertical (TikTok / Reels / Shorts)", "1:1 Cuadrado", "16:9 Horizontal"])
-        clip_duration = st.selectbox("Duración de cada clip", [30, 45, 60], index=1)
+        clip_duration = st.selectbox(t['dur_label'], [30, 45, 60], index=1)
         clips_quantity = st.slider("Cantidad de clips a extraer", min_value=5, max_value=25, value=15)
         st.markdown("---")
         
@@ -289,6 +292,34 @@ else:
     st.markdown(f"### {t['subtitle']}")
     st.markdown(f'<p class="small">{t["desc"]}</p>', unsafe_allow_html=True)
     st.divider()
+
+    # --- PANEL EXCLUSIVO DE ADMINISTRADOR PARA APROBAR USUARIOS ---
+    if st.session_state["role"] == "admin":
+        with st.expander("🛡️ Panel de Control de Propietario (Aprobación de Usuarios)", expanded=True):
+            st.write("Aquí puedes ver y admitir a los nuevos usuarios que se han registrado:")
+            
+            pending_users = [u for u, data in users.items() if not data.get("approved", False) and u != "yariel"]
+            
+            if not pending_users:
+                st.success("No hay solicitudes de nuevos usuarios pendientes.")
+            else:
+                for p_user in pending_users:
+                    col_p1, col_p2, col_p3 = st.columns([2, 2, 1])
+                    with col_p1:
+                        st.text(f"Usuario: {p_user} ({users[p_user]['name'])})")
+                    with col_p2:
+                        if st.button(f"✅ Admitir a {p_user}", key=f"approve_{p_user}"):
+                            users[p_user]["approved"] = True
+                            save_users(users)
+                            st.success(f"¡Usuario {p_user} admitido con éxito!")
+                            st.rerun()
+                    with col_p3:
+                        if st.button(f"❌ Rechazar", key=f"delete_{p_user}"):
+                            del users[p_user]
+                            save_users(users)
+                            st.warning(f"Usuario {p_user} eliminado.")
+                            st.rerun()
+            st.markdown("---")
 
     tab_url, tab_upload = st.tabs([t['tab_url'], t['tab_upload']])
 
@@ -347,15 +378,13 @@ else:
             if st.button(t['render_btn'], key="render_batch"):
                 output_clips = []
                 
-                # Obtener duración total del video usando ffprobe/subprocess
                 probe_cmd = ["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", video_path]
                 try:
                     dur_res = subprocess.run(probe_cmd, capture_output=True, text=True, check=True)
                     total_duration = float(dur_res.stdout.strip())
                 except:
-                    total_duration = 2700  # Por defecto 45 minutos si falla la lectura
+                    total_duration = 2700
 
-                # Calcular intervalos distribuidos para los N clips
                 step = max(30.0, (total_duration - clip_duration) / max(1, clips_quantity))
                 
                 progress_bar = st.progress(0)
@@ -398,7 +427,6 @@ else:
         st.markdown(f"## {t['result_title']}")
         st.write(f"Se han procesado **{len(batch_outputs)} clips verticales** listos para tus redes sociales:")
         
-        # Mostrar en cuadrícula de columnas
         cols = st.columns(3)
         for idx, clip_file in enumerate(batch_outputs):
             with cols[idx % 3]:
@@ -412,3 +440,4 @@ else:
                     key=f"dl_{idx}"
                 )
                 st.markdown("---")
+                
