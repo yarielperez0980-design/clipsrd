@@ -266,9 +266,8 @@ else:
                         "nocheckcertificate": True,
                         "geo_bypass": True,
                     }
-                    File "/mount/src/clipsrd/app.py", 
                       if Path("cookies.txt").exists():
-                     ^
+                      File "/mount/src/clipsrd/app.py"
                         ydl_opts["cookiefile"] = "cookies.txt"
                     with st.spinner("⚡ Conectando de forma segura con el servidor y extrayendo recurso..."):
                         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
